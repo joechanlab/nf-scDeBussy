@@ -1,0 +1,1 @@
+nextflow run ./main.nf -resume -profile iris -params-file ./data/params.yml -w "/scratch/chanj3/wangm10/CellAlginDTW_work"

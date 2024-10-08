@@ -1,0 +1,7 @@
+samplesheet: "./data/samplesheet.csv"
+gene_list: "/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC/limma.paired_SCLC_NSCLC.filtered.txt"
+outdir: "/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC.062124/results/"
+max_memory: "60.GB"
+max_cpus: 3
+max_time: "6.h"
+maxForks: 2
