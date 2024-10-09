@@ -3,6 +3,7 @@
 nextflow.enable.dsl = 2
 
 include { CELLALIGNDTW } from './modules/CellAlignDTW'
+include { REPORT } from './modules/report'
 
 workflow {
     // Access the samplesheet
@@ -18,5 +19,7 @@ workflow {
     }
 
     CELLALIGNDTW(out)
+
+    REPORT(CELLALIGNDTW.out.cluster_ordering, CELLALIGNDTW.out.summary_df_path, CELLALIGNDTW.out.aggregated_curves_path, CELLALIGNDTW.out.scores_df_path)
 
 }

@@ -7,9 +7,10 @@ process CELLALIGNDTW {
     tuple val(cluster_ordering), path(path)
 
     output:
-    path "${cluster_ordering}_summary_df.csv"
-    path "${cluster_ordering}_aggregated_curves.csv"
-    path "${cluster_ordering}_scores_df.csv"
+    val cluster_ordering, emit: cluster_ordering
+    path "${cluster_ordering}_summary_df.csv", emit: summary_df_path
+    path "${cluster_ordering}_aggregated_curves.csv", emit: aggregated_curves_path
+    path "${cluster_ordering}_scores_df.csv", emit: scores_df_path
 
     script:
     """
