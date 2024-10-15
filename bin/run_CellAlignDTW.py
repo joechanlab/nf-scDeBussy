@@ -7,8 +7,12 @@ from CellAlignDTW.pp import create_cellrank_probability_df
 def main():
     parser = argparse.ArgumentParser(description="Run CellAlignDTW analysis")
     parser.add_argument("--path", required=True, help="Path to the directory containing the h5ad files")
+    parser.add_argument("--outpath", required=True, help="Path to the output directory")
     parser.add_argument("--clusters", required=True, help="Comma-separated list of clusters to analyze")
+    #parser.add_argument("--patients", required=True, help="Comma-separated list of patients to analyze")
     parser.add_argument("--gene_list", required=True, help="Path to the file containing the list of DE genes")
+    parser.add_argument("--n_splines", required=True, help="n splines for GAM", type=int)
+    parser.add_argument("--lam", required=True, help="lambda for GAM", type=float)
     args = parser.parse_args()
 
     print(f"Starting CellAlignDTW analysis with path: {args.path}, clusters: {args.clusters}, and gene list: {args.gene_list}")
@@ -40,6 +44,7 @@ RU1646,NSCLC,SCLC-N_3
         values = parts[1:]
         result_dict[key] = values
     samples = ['RU1083', 'RU263', 'RU942', 'RU1444', 'RU1518', 'RU151', 'RU1293', 'RU1303', 'RU581', 'RU831']
+    #args.patients.split('_')
     downsample = 1500
 
     clusters = args.clusters.split("_")
@@ -56,18 +61,19 @@ RU1646,NSCLC,SCLC-N_3
     markers = ["NKX2-1", "NAPSA", "KRT17", "S100A6", "SFTA2", "LGALS3", "SLPI", "AGR2", "TMSB4X", "YAP1",
               "WWTR1", "CHGA", "CHGB", "SYP", "ENO2", "NCAM1", "STMN1", "ASCL1", "NEUROD1", "POU2F3", 
               "INSM1", "MYC", "MYCL", "VIM", "FN1", "RB1", "CDKN2A", "CDKN2B", "CCND1", "CCND2"]
-    DE_genes = pd.read_table(args.gene_list)
+    DE_genes = pd.read_table(args.gene_list, sep=None, engine='python')
     DE_genes = DE_genes.iloc[:,0].values
     all_genes = set(markers + DE_genes.tolist())
 
     print(f"Smoothing expression for genes: {all_genes}")
     summary_df, gene_curves, scores_df = gam_smooth_expression(align_obj.df, 
                                                                all_genes, 
-                                                               n_splines=6, lam=3)
+                                                               n_splines=args.n_splines, 
+                                                               lam=args.lam)
     print("Saving results...")
-    summary_df.to_csv(args.clusters + '_summary_df.csv')
-    gene_curves.to_csv(args.clusters  + "_aggregated_curves.csv")
-    scores_df.to_csv(args.clusters  + "_scores_df.csv")
+    summary_df.to_csv(os.path.join(args.outpath, args.clusters + '_summary_df.csv'))
+    gene_curves.to_csv(os.path.join(args.outpath, args.clusters  + "_aggregated_curves.csv"))
+    scores_df.to_csv(os.path.join(args.outpath, args.clusters  + "_scores_df.csv"))
 
 if __name__ == "__main__":
     main()

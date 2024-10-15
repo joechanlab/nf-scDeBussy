@@ -1,5 +1,5 @@
-﻿cluster_ordering,path
-NSCLC_SCLC-A,/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC.062124/individual.090124/
-NSCLC_SCLC-N,/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC.062124/individual.090124/
-NSCLC_SCLC-AN,/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC.062124/individual.090124/
-SCLC-A_SCLC-N,/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC.062124/individual.090124/
+﻿cluster_ordering,path,gene_list
+NSCLC_SCLC-A,/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC.062124/individual.090124/,/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC/limma.paired_SCLC_NSCLC.filtered.txt
+NSCLC_SCLC-N,/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC.062124/individual.090124/,/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC/limma.paired_SCLC_NSCLC.filtered.txt
+NSCLC_SCLC-AN,/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC.062124/individual.090124/,/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC/limma.paired_SCLC_NSCLC.filtered.txt
+SCLC-A_SCLC-N,/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC.062124/individual.090124/,/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC/wilcox_SCLC-A_SCLC-N.filtered.csv

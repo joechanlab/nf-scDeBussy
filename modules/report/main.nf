@@ -6,9 +6,7 @@ process REPORT {
 
     input:
     val cluster_ordering
-    path summary_df_path
-    path aggregated_curves_path
-    path scores_df_path
+    path output_path
 
     output:
     path "${cluster_ordering}_report.ipynb", emit: report_ipynb
@@ -19,9 +17,9 @@ process REPORT {
     export HOME=\$PWD
     python -m ipykernel install --user --name tslearn --display-name "[conda] tslearn"
     papermill ${baseDir}/bin/report.ipynb ${cluster_ordering}_report.ipynb \
-    -p summary_df_path ${summary_df_path} \
-    -p aggregated_curves_path ${aggregated_curves_path} \
-    -p scores_df_path ${scores_df_path} \
+    -p summary_df_path ${output_path}/${cluster_ordering}_summary_df.csv \
+    -p aggregated_curves_path ${output_path}/${cluster_ordering}_aggregated_curves.csv \
+    -p scores_df_path ${output_path}/${cluster_ordering}_scores_df.csv \
     -p cluster_ordering ${cluster_ordering}
     jupyter nbconvert --to html ${cluster_ordering}_report.ipynb
     """

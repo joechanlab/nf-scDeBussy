@@ -14,12 +14,12 @@ workflow {
 
     // Create a channel from the paths
     out = Channel.from(sample_sheet_data).map { row ->
-        def (cluster_ordering, path) = row
-        return tuple(cluster_ordering, path)
+        def (cluster_ordering, path, gene_list) = row
+        return tuple(cluster_ordering, path, gene_list)
     }
 
     CELLALIGNDTW(out)
 
-    REPORT(CELLALIGNDTW.out.cluster_ordering, CELLALIGNDTW.out.summary_df_path, CELLALIGNDTW.out.aggregated_curves_path, CELLALIGNDTW.out.scores_df_path)
+    REPORT(CELLALIGNDTW.out.cluster_ordering, CELLALIGNDTW.out.output_path)
 
 }
