@@ -51,19 +51,23 @@ RU1646,NSCLC,SCLC-N_3
 
     h5ad_files = [os.path.join(args.path, x + ".no_cc.hvg_2000.090124.h5ad") for x in samples]
     print(f"Creating cellrank probability dataframe with samples: {samples} and downsample: {downsample}")
-    df = create_cellrank_probability_df(h5ad_files, 'cell_type_final2', samples, 
+    combined_adata, df = create_cellrank_probability_df(h5ad_files, 'cell_type_final2', samples, 
                                         result_dict, clusters, downsample=downsample)
-    align_obj = CellAlignDTW(df, clusters, 'sample', 'score', 'cell_type')
+    align_obj = CellAlignDTW(df, clusters, 'sample', 'score', 'cell_id', 'cell_type')
 
     print("Aligning data...")
     align_obj.align()
 
     markers = ["NKX2-1", "NAPSA", "KRT17", "S100A6", "SFTA2", "LGALS3", "SLPI", "AGR2", "TMSB4X", "YAP1",
               "WWTR1", "CHGA", "CHGB", "SYP", "ENO2", "NCAM1", "STMN1", "ASCL1", "NEUROD1", "POU2F3", 
-              "INSM1", "MYC", "MYCL", "VIM", "FN1", "RB1", "CDKN2A", "CDKN2B", "CCND1", "CCND2"]
-    DE_genes = pd.read_table(args.gene_list, sep=None, engine='python')
-    DE_genes = DE_genes.iloc[:,0].values
-    all_genes = set(markers + DE_genes.tolist())
+              "INSM1", "MYC", "MYCL", "VIM", "FN1", "RB1", "CDKN2A", "CDKN2B", "CCND1", "CCND2", "PHOX2B"]
+    if args.gene_list == "All":
+        all_genes = combined_adata.var_names
+        del combined_adata
+    else:
+        DE_genes = pd.read_table(args.gene_list, sep=None, engine='python')
+        DE_genes = DE_genes.iloc[:,0].values
+        all_genes = set(markers + DE_genes.tolist())
 
     print(f"Smoothing expression for genes: {all_genes}")
     summary_df, gene_curves, scores_df = gam_smooth_expression(align_obj.df, 

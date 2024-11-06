@@ -4,7 +4,7 @@ process CELLALIGNDTW {
     cache 'lenient'
 
     input:
-    tuple val(cluster_ordering), path(path), path(gene_list)
+    tuple val(cluster_ordering), path(path), val(gene_list)
 
     output:
     val cluster_ordering, emit: cluster_ordering
