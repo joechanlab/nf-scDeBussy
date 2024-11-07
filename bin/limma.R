@@ -1,84 +1,56 @@
 # Load necessary libraries
 library(dplyr)
-library('Matrix')
+library(Matrix)
 library(tibble)
 library(zoo)
 library(stringr)
 library(lubridate)
-library(dplyr)
-library(tibble)
 library(rhdf5)
 library(limma)
 library(edgeR)
-library(commandr)
 
 # Define command line arguments
 args <- commandArgs(trailingOnly = TRUE)
-opt <- commandr::commandArgs(quiet = TRUE)
 
 # Define input and output directories
-input_dir <- opt$input_dir
-input_name <- opt$input_name
-cell_types <- opt$cell_types
-odir <- opt$output_dir
+input_dir <- args[1]
+cell_types <- args[2]
+odir <- args[3]
+if (!dir.exists(odir)) {
+  dir.create(odir)
+}
 
 # Read data
-main_dir = input_dir
-fn = paste0(main_dir, '/obs.', input_name, '.csv')
-obs_df = read.table(fn, sep = ',', header = T, row.names=1)
-fn = paste0(main_dir, 'var_names', input_name, '.csv')
-g = readLines(fn)
+cts = read.table(paste0(input_dir, '/counts.', cell_types, '.csv'), sep = ',', header = T, row.names=1)
+obs_df = cts[,c('sample','cell_type')]
+cts = cts[, !(colnames(cts) %in% c('sample', 'cell_type'))]
+cts = t(cts[rowSums(cts) != 0, colSums(cts) != 0])
+obs_df$cell_type = factor(obs_df$cell_type, levels=strsplit(cell_types, "_")[[1]])
 
-fn = paste0(main_dir, 'obs_names.', intput_name, '.csv', )
-bc = readLines(fn)
-
-cts = readMM(paste0(main_dir, 'counts.' input_name, '.mtx'))
-
-cts = as.matrix(cts)
-
-colnames(cts) = g
-rownames(cts) = bc
-
-cts = t(cts)
-cts = cts[rowSums(cts) != 0,]
-
-obs_df = obs_df[colnames(cts),]
-
-obs_df = obs_df %>% dplyr::filter(colSums(cts) != 0)
-cts = cts[,colSums(cts) != 0]
-
-obs_df$patient = factor(gsub('_.*','',rownames(obs_df)))
-dir.create(odir)
-
-obs_df$histo = factor(obs_df$histo, levels=cell_types)
-
-# Define regression formula
-reg_formula = '~histo'
-
-# Create design matrix
+# Define regression formula and create design matrix
+reg_formula = '~cell_type'
 design <- model.matrix(as.formula(reg_formula), obs_df)
+
+# Filter and normalize data
 dge <- DGEList(counts=cts)
 keep <- filterByExpr(dge, design)
 dge <- dge[keep,,keep.lib.sizes=FALSE]
 dge <- calcNormFactors(dge)
 
-# Perform voom transformation
-v <- voom(dge,design, plot=T)
-corfit <- duplicateCorrelation(v,design,block=obs_df$patient)
-print(corfit$consensus)
-
 # Perform voom transformation with block correlation
-v <- voom(dge,design, plot=T, block=obs_df$patient, correlation = corfit$consensus)
-corfit <- duplicateCorrelation(v,design,block=obs_df$patient)
+v <- voom(dge,design, plot=T)
+corfit <- duplicateCorrelation(v,design,block=obs_df$sample)
 print(corfit$consensus)
 
-# Fit linear model
-fit <- lmFit(v, design, block=obs_df$patient, correlation=corfit$consensus)
-fit <- eBayes(fit, trend=T, robust=T)
+v <- voom(dge,design, plot=T, block=obs_df$sample, correlation = corfit$consensus)
+corfit <- duplicateCorrelation(v,design,block=obs_df$sample)
 
-# Get top table
+# Fit linear model and get top table
+fit <- lmFit(v, design, block=obs_df$sample, correlation=corfit$consensus)
+fit <- eBayes(fit, trend=T, robust=T)
 tt = topTable(fit, number=30000, sort.by='none')
-cell_types = paste(cell_types, collapse='_')
-write.table(tt, paste0(odir, '/limma.paired_', cell_types,'.txt',), sep='\t', quote=F, row.names=T, col.names=NA)
+
+# Write results
+write.table(tt, paste0(odir, '/limma.paired_', cell_types,'.txt'), sep='\t', quote=F, row.names=T, col.names=NA)
 write.table(tt %>% dplyr::filter(adj.P.Val < 0.1 & abs(logFC) > log2(1.5)), 
             paste0(odir, '/limma.paired_', cell_types, '.filtered.txt'), sep='\t', quote=F, row.names=T, col.names=NA)
