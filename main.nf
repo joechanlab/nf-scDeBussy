@@ -20,6 +20,6 @@ workflow {
 
     CELLALIGNDTW(out)
 
-    REPORT(CELLALIGNDTW.out.cluster_ordering, CELLALIGNDTW.out.output_path)
+    //REPORT(CELLALIGNDTW.out.cluster_ordering, CELLALIGNDTW.out.output_path)
 
 }

@@ -1,6 +1,5 @@
-samplesheet: "./data/samplesheet.csv"
-gene_list: "/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC/limma.paired_SCLC_NSCLC.filtered.txt"
-outdir: "/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC.062124/results/"
+samplesheet: "./data/samplesheet_all_genes.csv"
+outdir: "/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC.062124/results_all_genes/"
 n_splines: 6
 lam: 4
 max_memory: "100.GB"

@@ -163,3 +163,4 @@ cython_debug/
 .nextflow.log*
 .nextflow/
 data/
+log/
