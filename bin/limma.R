@@ -74,5 +74,4 @@ print(dim(tt_filtered))
 
 # Write results
 write.table(tt, paste0(odir, '/limma.paired_', cell_types,'.txt'), sep='\t', quote=F, row.names=T, col.names=NA)
-write.table(, 
-            paste0(odir, '/limma.paired_', cell_types, '.filtered.txt'), sep='\t', quote=F, row.names=T, col.names=NA)
+write.table(tt_filtered, paste0(odir, '/limma.paired_', cell_types, '.filtered.txt'), sep='\t', quote=F, row.names=T, col.names=NA)
