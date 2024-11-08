@@ -22,13 +22,28 @@ if (!dir.exists(odir)) {
 
 # Read data
 cts = read.table(paste0(input_dir, '/counts.', cell_types, '.csv'), sep = ',', header = T, row.names=1)
-obs_df = cts[,c('sample','cell_type')]
-cts = cts[, !(colnames(cts) %in% c('sample', 'cell_type'))]
+metavar = c('patient', 'cell_type', 'chemo', 'IO', 'TKI', 'tissue', 'V2V3',
+            'age', 'sex', 'race', 'smoking', 'EGFR_status')
+obs_df = cts[,metavar]
+obs_df$chemo = factor(1*(obs_df$chemo=='Chemo'), levels=c(0,1))
+obs_df$IO = factor(1*(obs_df$IO=='IO'), levels=c(0,1))
+obs_df$TKI = factor(1*(obs_df$TKI=='TKI'), levels=c(0,1))
+obs_df$LN = factor(1*(obs_df$tissue=='LN'), levels=c(0,1))
+obs_df$PDX = factor(1*(obs_df$tissue=='PDX'), levels=c(0,1))
+obs_df$metastasis = factor(1*(!obs_df$tissue %in% c('Lung','LN','PDX')), levels=c(0,1))
+obs_df$V2V3 = factor(1*(obs_df$V2V3 == 'ten_x_v3'), levels=c(0,1))
+obs_df$EGFR_status = factor(1*(obs_df$EGFR_status == 'Yes'), levels=c(0,1))
+obs_df$sex = as.numeric(obs_df$sex == 'Male')
+obs_df$age = as.numeric(obs_df$age)
+obs_df$smoking = as.numeric(obs_df$smoking != 'never')
+obs_df$race = as.numeric(obs_df$race !='White')
+obs_df$cell_type = factor(as.numeric(obs_df$cell_type == strsplit(cell_types, "_")[[1]][1]))
+
+cts = cts[, !(colnames(cts) %in% metavar)]
 cts = t(cts[rowSums(cts) != 0, colSums(cts) != 0])
-obs_df$cell_type = factor(obs_df$cell_type, levels=strsplit(cell_types, "_")[[1]])
 
 # Define regression formula and create design matrix
-reg_formula = '~cell_type'
+reg_formula = '~V2V3 + LN + PDX + metastasis + chemo + IO + TKI + EGFR_status+ smoking + sex + race + cell_type'
 design <- model.matrix(as.formula(reg_formula), obs_df)
 
 # Filter and normalize data
@@ -39,18 +54,25 @@ dge <- calcNormFactors(dge)
 
 # Perform voom transformation with block correlation
 v <- voom(dge,design, plot=T)
-corfit <- duplicateCorrelation(v,design,block=obs_df$sample)
+corfit <- duplicateCorrelation(v,design,block=obs_df$patient)
 print(corfit$consensus)
 
-v <- voom(dge,design, plot=T, block=obs_df$sample, correlation = corfit$consensus)
-corfit <- duplicateCorrelation(v,design,block=obs_df$sample)
+v <- voom(dge,design, plot=T, block=obs_df$patient, correlation = corfit$consensus)
+corfit <- duplicateCorrelation(v,design,block=obs_df$patient)
 
 # Fit linear model and get top table
-fit <- lmFit(v, design, block=obs_df$sample, correlation=corfit$consensus)
+fit <- lmFit(v, design, block=obs_df$patient, correlation=corfit$consensus)
 fit <- eBayes(fit, trend=T, robust=T)
-tt = topTable(fit, number=30000, sort.by='none')
+tt = topTable(fit, coef='cell_type1', number=30000, sort.by='none')
+print(max(tt$logFC))
+print(min(tt$adj.P.Val))
+tt_filtered = tt %>% 
+  dplyr::filter(abs(logFC) > log2(1.5), adj.P.Val < 0.1) %>%
+  dplyr::arrange(-logFC)
+print(dim(tt_filtered))
+
 
 # Write results
 write.table(tt, paste0(odir, '/limma.paired_', cell_types,'.txt'), sep='\t', quote=F, row.names=T, col.names=NA)
-write.table(tt %>% dplyr::filter(adj.P.Val < 0.1 & abs(logFC) > log2(1.5)), 
+write.table(, 
             paste0(odir, '/limma.paired_', cell_types, '.filtered.txt'), sep='\t', quote=F, row.names=T, col.names=NA)

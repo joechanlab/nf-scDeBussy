@@ -53,11 +53,12 @@ RU1646,NSCLC,SCLC-N_3
         'TKI': combined_adata.obs['TKI'].values,
         'tissue': combined_adata.obs['tissue'].values,
         'V2V3': combined_adata.obs['ten_x_version'].values,
-        'sample': combined_adata.obs_names.str.split('_').str[:2].str.join('_')
+        #'sample': combined_adata.obs_names.str.split('_').str[:2].str.join('_')
     })
     counts_df['patient'] = counts_df_metadata['patient'].values
-    counts_df['sample'] = counts_df_metadata['sample'].values
-    summed_counts = counts_df.groupby(['patient', 'sample', 'cell_type']).sum().reset_index()
+    #counts_df['sample'] = counts_df_metadata['sample'].values
+    counts_df['cell_type'] = counts_df_metadata['cell_type'].values
+    summed_counts = counts_df.groupby(['patient', 'cell_type']).sum().reset_index()
     
     metadata_age = pd.read_table('/data1/chanj3/Xenium.lung.NE_plasticity.010124/ref/metadata.072523/Rudin Lab NE transformation 040723_AG_CF.JC.subset_to_transformed.txt')
     metadata_age = pd.DataFrame({'patient': metadata_age['Rudin Patient ID'].apply(lambda x: "RU" + str(x)),
@@ -69,7 +70,7 @@ RU1646,NSCLC,SCLC-N_3
     metadata_age = metadata_age.groupby('patient').first().reset_index()
     counts_df_metadata = counts_df_metadata.merge(metadata_age, on=['patient'], how='left')
     counts_df_metadata = counts_df_metadata.drop_duplicates().reset_index(drop=True)
-    summed_counts = summed_counts.merge(counts_df_metadata, on=['patient', 'sample'], how='left')
+    summed_counts = summed_counts.merge(counts_df_metadata, on=['patient', 'cell_type'], how='left')
 
     print("Saving results...")
     summed_counts.to_csv(os.path.join(args.outpath, f'counts.{args.clusters}.csv'))
