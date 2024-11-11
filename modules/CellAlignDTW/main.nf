@@ -15,11 +15,15 @@ process CELLALIGNDTW {
     """
     export NUMBA_CACHE_DIR=\$PWD
     mkdir -p ${cluster_ordering}
+    gene_list=${cluster_ordering}/limma.paired_${cluster_ordering}.filtered.txt 
+    if [ "${params.limma}" != "true" ]; then
+        gene_list="All"
+    fi
     /usersoftware/chanj3/tslearn/bin/python ${baseDir}/bin/run_CellAlignDTW.py \
         --path ${path} \
         --outpath ${cluster_ordering} \
         --clusters ${cluster_ordering} \
-        --gene_list ${cluster_ordering}/limma.paired_${cluster_ordering}.filtered.txt \
+        --gene_list \${gene_list} \
         --n_splines ${params.n_splines} \
         --lam ${params.lam}
     """

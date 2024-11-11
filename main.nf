@@ -19,12 +19,14 @@ workflow {
         return tuple(cluster_ordering, path)
     }
 
-    PREPROCESSING(out)
+    out = PREPROCESSING(out)
 
-    LIMMA(PREPROCESSING.out.cluster_ordering, PREPROCESSING.out.output_path)
-    
-    CELLALIGNDTW(LIMMA.out.cluster_ordering, LIMMA.out.output_path)
-
+    if (params.limma) {
+        LIMMA(PREPROCESSING.out.cluster_ordering, PREPROCESSING.out.output_path)
+        CELLALIGNDTW(LIMMA.out.cluster_ordering, LIMMA.out.output_path)
+    } else {
+        CELLALIGNDTW(PREPROCESSING.out.cluster_ordering, PREPROCESSING.out.output_path)
+    }
     //REPORT(CELLALIGNDTW.out.cluster_ordering, CELLALIGNDTW.out.output_path)
 
 }

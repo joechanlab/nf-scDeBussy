@@ -18,25 +18,25 @@ def main():
     print(f"Starting CellAlignDTW analysis with path: {args.path}, clusters: {args.clusters}, and gene list: {args.gene_list}")
 
     downsample = 1500
-
     clusters = args.clusters.split("_")
-    
-    df = pd.read_csv(os.path.join(args.path, f'cellrank.{args.clusters}.csv'))
-    df = df.groupby('sample').apply(lambda group: stratified_downsample(group, 'score', downsample)).reset_index(drop=True).drop(columns=['Unnamed: 0'])
+    df = pd.read_csv(os.path.join(args.path, f'cellrank.{args.clusters}.csv'), index_col=0)
+    counts = pd.read_csv(os.path.join(args.path, f'counts.{args.clusters}.csv'), index_col=0)
+    all_genes = set(counts.columns[2:(counts.shape[1] - 9)])
+    df = df.groupby('sample').apply(lambda group: stratified_downsample(group, 'score', downsample)).reset_index(drop=True)
     align_obj = CellAlignDTW(df, clusters, 'sample', 'score', 'cell_id', 'cell_type')
 
     print("Aligning data...")
     align_obj.align()
 
-    all_genes = ["NKX2-1", "NAPSA", "KRT17", "S100A6", "SFTA2", "LGALS3", "SLPI", "AGR2", "TMSB4X", "YAP1",
+    if args.gene_list != "All":
+        all_genes = ["NKX2-1", "NAPSA", "KRT17", "S100A6", "SFTA2", "LGALS3", "SLPI", "AGR2", "TMSB4X", "YAP1",
               "WWTR1", "CHGA", "CHGB", "SYP", "ENO2", "NCAM1", "STMN1", "ASCL1", "NEUROD1", "POU2F3", 
               "INSM1", "MYC", "MYCL", "VIM", "FN1", "RB1", "CDKN2A", "CDKN2B", "CCND1", "CCND2", "PHOX2B"]
-
-    DE_genes = pd.read_table(args.gene_list, sep=None, engine='python')
-    if DE_genes.shape[1] > 1:
-        DE_genes = DE_genes.iloc[:,0].values
-        all_genes = set(all_genes + DE_genes.tolist())
-    all_genes = set(all_genes).intersection(set(align_obj.df.columns))
+        DE_genes = pd.read_table(args.gene_list, sep=None, engine='python')
+        if DE_genes.shape[1] > 1:
+            DE_genes = DE_genes.iloc[:,0].values
+            all_genes = set(all_genes + DE_genes.tolist())
+        all_genes = set(all_genes).intersection(set(align_obj.df.columns))
     
     print(f"Smoothing expression for genes: {all_genes}")
     summary_df, gene_curves, scores_df = gam_smooth_expression(align_obj.df, 
