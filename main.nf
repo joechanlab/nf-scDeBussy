@@ -1,7 +1,8 @@
 #!/usr/bin/env nextflow
 
 nextflow.enable.dsl = 2
-
+include { PREPROCESSING } from './modules/preprocessing'
+include { LIMMA } from './modules/limma'
 include { CELLALIGNDTW } from './modules/CellAlignDTW'
 include { REPORT } from './modules/report'
 
@@ -14,11 +15,15 @@ workflow {
 
     // Create a channel from the paths
     out = Channel.from(sample_sheet_data).map { row ->
-        def (cluster_ordering, path, gene_list) = row
-        return tuple(cluster_ordering, path, gene_list)
+        def (cluster_ordering, path) = row
+        return tuple(cluster_ordering, path)
     }
 
-    CELLALIGNDTW(out)
+    PREPROCESSING(out)
+
+    LIMMA(PREPROCESSING.out.cluster_ordering, PREPROCESSING.out.output_path)
+    
+    CELLALIGNDTW(LIMMA.out.cluster_ordering, LIMMA.out.output_path)
 
     //REPORT(CELLALIGNDTW.out.cluster_ordering, CELLALIGNDTW.out.output_path)
 

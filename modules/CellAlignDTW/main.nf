@@ -4,7 +4,8 @@ process CELLALIGNDTW {
     cache 'lenient'
 
     input:
-    tuple val(cluster_ordering), path(path), val(gene_list)
+    val cluster_ordering
+    path path
 
     output:
     val cluster_ordering, emit: cluster_ordering
@@ -13,14 +14,13 @@ process CELLALIGNDTW {
     script:
     """
     export NUMBA_CACHE_DIR=\$PWD
-    mkdir ${cluster_ordering}
+    mkdir -p ${cluster_ordering}
     /usersoftware/chanj3/tslearn/bin/python ${baseDir}/bin/run_CellAlignDTW.py \
         --path ${path} \
         --outpath ${cluster_ordering} \
         --clusters ${cluster_ordering} \
-        --gene_list ${gene_list} \
+        --gene_list ${cluster_ordering}/limma.paired_${cluster_ordering}.filtered.txt \
         --n_splines ${params.n_splines} \
         --lam ${params.lam}
     """
-
 }
