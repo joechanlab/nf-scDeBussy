@@ -36,6 +36,7 @@ def main():
     if DE_genes.shape[1] > 1:
         DE_genes = DE_genes.iloc[:,0].values
         all_genes = set(all_genes + DE_genes.tolist())
+    all_genes = set(all_genes).intersection(set(align_obj.df.columns))
     
     print(f"Smoothing expression for genes: {all_genes}")
     summary_df, gene_curves, scores_df = gam_smooth_expression(align_obj.df, 
