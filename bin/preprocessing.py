@@ -51,7 +51,7 @@ RU1646,NSCLC,SCLC-N_3
         'chemo': combined_adata.obs['chemo'].values,
         'IO': combined_adata.obs['IO'].values,
         'TKI': combined_adata.obs['TKI'].values,
-        'tissue': combined_adata.obs['tissue'].values,
+        #'tissue': combined_adata.obs['tissue'].values,
         'V2V3': combined_adata.obs['ten_x_version'].values,
         #'sample': combined_adata.obs_names.str.split('_').str[:2].str.join('_')
     })
