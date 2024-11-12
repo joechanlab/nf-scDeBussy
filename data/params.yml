@@ -3,7 +3,7 @@ outdir: "/data1/chanj3/HTA.lung.NE_plasticity.120122/fresh.SCLC_NSCLC.062124/res
 limma: false
 n_splines: 6
 lam: 4
-max_memory: "100.GB"
-max_cpus: 3
-max_time: "2.h"
+max_memory: "200.GB"
+max_cpus: 2
+max_time: "12.h"
 maxForks: 2

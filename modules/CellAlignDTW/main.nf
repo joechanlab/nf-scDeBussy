@@ -17,7 +17,7 @@ process CELLALIGNDTW {
     mkdir -p ${cluster_ordering}
     gene_list=${cluster_ordering}/limma.paired_${cluster_ordering}.filtered.txt 
     if [ "${params.limma}" != "true" ]; then
-        gene_list="All"
+        gene_list=${cluster_ordering}/hvg_genes_${cluster_ordering}.txt 
     fi
     /usersoftware/chanj3/tslearn/bin/python ${baseDir}/bin/run_CellAlignDTW.py \
         --path ${path} \

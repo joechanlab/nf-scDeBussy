@@ -1,6 +1,8 @@
 import os
 import argparse
 import pandas as pd
+import scanpy as sc
+from pybiomart import Dataset
 from CellAlignDTW.pp import create_cellrank_probability_df
 
 def main():
@@ -42,6 +44,32 @@ RU1646,NSCLC,SCLC-N_3
     combined_adata, df = create_cellrank_probability_df(h5ad_files, 'cell_type_final2', samples, 
                                         result_dict, clusters)
     
+    print('Filtering for protein coding genes...')
+    dataset = Dataset(name='hsapiens_gene_ensembl', host='http://www.ensembl.org')
+    gene_annotations =  dataset.query(attributes=['external_gene_name', 'gene_biotype'])
+    protein_coding = gene_annotations[gene_annotations['Gene type'] == 'protein_coding'].dropna()
+    to_exclude = protein_coding['Gene name'].str.upper().str.startswith(('MT-', 'RPS', 'RPL', 'HLA', "LOC", "FAM")) | protein_coding['Gene name'].str.upper().str.contains("ORF")
+    protein_coding = protein_coding[~to_exclude]
+    to_keep = combined_adata.var_names.isin(protein_coding['Gene name'].values)
+    combined_adata = combined_adata[:, to_keep]
+
+    print("For each cell type, extract the top 2000 highly variable genes...")
+    hvg_genes = pd.DataFrame()
+    unique_cell_types = combined_adata.obs['cell_type_final2'].unique()
+
+    for i in range(0, len(unique_cell_types)+1):
+        if i == 0:
+            cell_type = "All"
+            subset = combined_adata.copy()
+        else: 
+            cell_type = unique_cell_types[i-1]
+            subset = combined_adata[combined_adata.obs['cell_type_final2'] == cell_type].copy()
+        sc.pp.highly_variable_genes(subset, n_top_genes=2000, layer="counts", flavor="seurat_v3", batch_key='sample', span=1)
+        hvg_bool = subset.var['highly_variable']
+        hvg_genes[cell_type] = hvg_bool
+        hvg_genes = hvg_genes.fillna(False)
+    hvg_genes = hvg_genes.loc[hvg_genes.sum(axis=1) > 0,:]
+
     print(f"Pseudobulking for cell types: {clusters}")
     # Create a DataFrame from the counts layer
     counts_df = pd.DataFrame(combined_adata.layers['counts'], index=combined_adata.obs_names, columns=combined_adata.var_names)
@@ -75,6 +103,7 @@ RU1646,NSCLC,SCLC-N_3
     print("Saving results...")
     summed_counts.to_csv(os.path.join(args.outpath, f'counts.{args.clusters}.csv'))
     df.to_csv(os.path.join(args.outpath, f'cellrank.{args.clusters}.csv'))
+    hvg_genes.to_csv(os.path.join(args.outpath, f'hvg_genes_{args.clusters}.txt'), sep='\t')
 
 if __name__ == "__main__":
     main()
