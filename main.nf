@@ -27,6 +27,5 @@ workflow {
     } else {
         CELLALIGNDTW(PREPROCESSING.out.cluster_ordering, PREPROCESSING.out.output_path)
     }
-    //REPORT(CELLALIGNDTW.out.cluster_ordering, CELLALIGNDTW.out.output_path)
-
+    REPORT(CELLALIGNDTW.out.cluster_ordering, CELLALIGNDTW.out.output_path)
 }
