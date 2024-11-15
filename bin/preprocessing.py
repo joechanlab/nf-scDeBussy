@@ -48,27 +48,16 @@ RU1646,NSCLC,SCLC-N_3
     dataset = Dataset(name='hsapiens_gene_ensembl', host='http://www.ensembl.org')
     gene_annotations =  dataset.query(attributes=['external_gene_name', 'gene_biotype'])
     protein_coding = gene_annotations[gene_annotations['Gene type'] == 'protein_coding'].dropna()
-    to_exclude = protein_coding['Gene name'].str.upper().str.startswith(('MT-', 'RPS', 'RPL', 'HLA', "LOC", "FAM")) | protein_coding['Gene name'].str.upper().str.contains("ORF")
+    to_exclude = protein_coding['Gene name'].str.upper().str.startswith(('MT-', 'RPS', 'RPL')) | protein_coding['Gene name'].str.upper().str.contains("ORF")
     protein_coding = protein_coding[~to_exclude]
     to_keep = combined_adata.var_names.isin(protein_coding['Gene name'].values)
     combined_adata = combined_adata[:, to_keep]
 
-    print("For each cell type, extract the top 2000 highly variable genes...")
-    hvg_genes = pd.DataFrame()
-    unique_cell_types = combined_adata.obs['cell_type_final2'].unique()
-
-    for i in range(0, len(unique_cell_types)+1):
-        if i == 0:
-            cell_type = "All"
-            subset = combined_adata.copy()
-        else: 
-            cell_type = unique_cell_types[i-1]
-            subset = combined_adata[combined_adata.obs['cell_type_final2'] == cell_type].copy()
-        sc.pp.highly_variable_genes(subset, n_top_genes=2000, layer="counts", flavor="seurat_v3", batch_key='sample', span=1)
-        hvg_bool = subset.var['highly_variable']
-        hvg_genes[cell_type] = hvg_bool
-        hvg_genes = hvg_genes.fillna(False)
-    hvg_genes = hvg_genes.loc[hvg_genes.sum(axis=1) > 0,:]
+    print("For each cell type, extract highly variable genes...")
+    sc.pp.highly_variable_genes(combined_adata, n_top_genes=5000, layer="counts", flavor="seurat_v3", batch_key='sample', span=1)
+    hvg_genes = pd.DataFrame(combined_adata.var[['highly_variable_rank', 'highly_variable_nbatches']])[combined_adata.var['highly_variable']]
+    hvg_genes = hvg_genes[hvg_genes['highly_variable_nbatches'] > hvg_genes['highly_variable_nbatches'].median()]
+    hvg_genes.sort_values(['highly_variable_rank'], inplace=True)
 
     print(f"Pseudobulking for cell types: {clusters}")
     # Create a DataFrame from the counts layer
