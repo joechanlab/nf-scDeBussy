@@ -1,11 +1,11 @@
 import os
 import argparse
 import pandas as pd
-from CellAlignDTW import CellAlignDTW, gam_smooth_expression
-from CellAlignDTW.pp import stratified_downsample
+from scDeBussy import aligner, gam_smooth_expression
+from scDeBussy.pp import stratified_downsample
 
 def main():
-    parser = argparse.ArgumentParser(description="Run CellAlignDTW analysis")
+    parser = argparse.ArgumentParser(description="Run scDeBussy analysis")
     parser.add_argument("--path", required=True, help="Path to the directory containing the files")
     parser.add_argument("--outpath", required=True, help="Path to the output directory")
     parser.add_argument("--clusters", required=True, help="Comma-separated list of clusters to analyze")
@@ -15,7 +15,7 @@ def main():
     parser.add_argument("--lam", required=True, help="lambda for GAM", type=float)
     args = parser.parse_args()
 
-    print(f"Starting CellAlignDTW analysis with path: {args.path}, clusters: {args.clusters}, and gene list: {args.gene_list}")
+    print(f"Starting scDeBussy analysis with path: {args.path}, clusters: {args.clusters}, and gene list: {args.gene_list}")
 
     downsample = 1500
     clusters = args.clusters.split("_")
@@ -23,7 +23,12 @@ def main():
     counts = pd.read_csv(os.path.join(args.path, f'counts.{args.clusters}.csv'), index_col=0)
     all_genes = set(counts.columns[2:(counts.shape[1] - 9)])
     df = df.groupby('sample').apply(lambda group: stratified_downsample(group, 'score', downsample)).reset_index(drop=True)
-    align_obj = CellAlignDTW(df, clusters, 'sample', 'score', 'cell_id', 'cell_type')
+    align_obj = aligner(df=df, 
+                             cluster_ordering=clusters, 
+                             subject_col='sample', 
+                             score_col='score', 
+                             cell_id_col='cell_id', 
+                             cell_type_col='cell_type')
 
     print("Aligning data...")
     align_obj.align()

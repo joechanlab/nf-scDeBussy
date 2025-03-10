@@ -3,10 +3,10 @@ import argparse
 import pandas as pd
 import scanpy as sc
 from pybiomart import Dataset
-from CellAlignDTW.pp import create_cellrank_probability_df
+from scDeBussy.pp import create_cellrank_probability_df
 
 def main():
-    parser = argparse.ArgumentParser(description="Preprocessing for CellAlignDTW analysis")
+    parser = argparse.ArgumentParser(description="Preprocessing for scDeBussy analysis")
     parser.add_argument("--path", required=True, help="Path to the directory containing the h5ad files")
     parser.add_argument("--clusters", required=True, help="Clusters to analyze (concatenated by underscores)")
     parser.add_argument("--outpath", required=True, help="Path to the output directory")
@@ -38,11 +38,15 @@ RU1646,NSCLC,SCLC-N_3
         key = parts[0]
         values = parts[1:]
         result_dict[key] = values
-    samples = ['RU1083', 'RU263', 'RU942', 'RU1444', 'RU1518', 'RU151', 'RU1293', 'RU1303', 'RU581', 'RU831']
+    samples = ['RU1083', 'RU263', 'RU942', 'RU1444', 'RU1518', 'RU1293', 'RU1303', 'RU581', 'RU831', 'RU151']
     clusters = args.clusters.split("_")
     h5ad_files = [os.path.join(args.path, x + ".no_cc.hvg_2000.090124.h5ad") for x in samples]
-    combined_adata, df = create_cellrank_probability_df(h5ad_files, 'cell_type_final2', samples, 
-                                        result_dict, clusters)
+    combined_adata, df = create_cellrank_probability_df(adata_paths=h5ad_files, 
+                                                        cell_type_col='cell_type_final2', 
+                                                        subject_names=samples, 
+                                                        cluster_ordering=clusters,
+                                                        pseudotime_col='term_states_fwd_memberships',
+                                                        cellrank_cols_dict=result_dict)
     
     print('Filtering for protein coding genes...')
     dataset = Dataset(name='hsapiens_gene_ensembl', host='http://www.ensembl.org')
@@ -63,7 +67,7 @@ RU1646,NSCLC,SCLC-N_3
     # Create a DataFrame from the counts layer
     counts_df = pd.DataFrame(combined_adata.layers['counts'], index=combined_adata.obs_names, columns=combined_adata.var_names)
     counts_df_metadata = pd.DataFrame({
-        'patient': df['sample'].values,
+        'patient': df['subject'].values,
         'cell_type': df['cell_type'].values,
         'chemo': combined_adata.obs['chemo'].values,
         'IO': combined_adata.obs['IO'].values,

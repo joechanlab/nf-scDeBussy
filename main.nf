@@ -3,7 +3,7 @@
 nextflow.enable.dsl = 2
 include { PREPROCESSING } from './modules/preprocessing'
 include { LIMMA } from './modules/limma'
-include { CELLALIGNDTW } from './modules/CellAlignDTW'
+include { SCDEDUSSY } from './modules/scDeBussy'
 include { REPORT } from './modules/report'
 
 workflow {
@@ -23,9 +23,9 @@ workflow {
 
     if (params.limma) {
         LIMMA(PREPROCESSING.out.cluster_ordering, PREPROCESSING.out.output_path)
-        CELLALIGNDTW(LIMMA.out.cluster_ordering, LIMMA.out.output_path)
+        SCDEDUSSY(LIMMA.out.cluster_ordering, LIMMA.out.output_path)
     } else {
-        CELLALIGNDTW(PREPROCESSING.out.cluster_ordering, PREPROCESSING.out.output_path)
+        SCDEDUSSY(PREPROCESSING.out.cluster_ordering, PREPROCESSING.out.output_path)
     }
-    REPORT(CELLALIGNDTW.out.cluster_ordering, CELLALIGNDTW.out.output_path)
+    REPORT(SCDEDUSSY.out.cluster_ordering, SCDEDUSSY.out.output_path)
 }
