@@ -22,10 +22,10 @@ def main():
     df = pd.read_csv(os.path.join(args.path, f'cellrank.{args.clusters}.csv'), index_col=0)
     counts = pd.read_csv(os.path.join(args.path, f'counts.{args.clusters}.csv'), index_col=0)
     all_genes = set(counts.columns[2:(counts.shape[1] - 9)])
-    df = df.groupby('sample').apply(lambda group: stratified_downsample(group, 'score', downsample)).reset_index(drop=True)
+    df = df.groupby('subject').apply(lambda group: stratified_downsample(group, 'score', downsample)).reset_index(drop=True)
     align_obj = aligner(df=df, 
                              cluster_ordering=clusters, 
-                             subject_col='sample', 
+                             subject_col='subject', 
                              score_col='score', 
                              cell_id_col='cell_id', 
                              cell_type_col='cell_type')

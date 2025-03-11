@@ -58,7 +58,7 @@ RU1646,NSCLC,SCLC-N_3
     combined_adata = combined_adata[:, to_keep]
 
     print("For each cell type, extract highly variable genes...")
-    sc.pp.highly_variable_genes(combined_adata, n_top_genes=5000, layer="counts", flavor="seurat_v3", batch_key='sample', span=1)
+    sc.pp.highly_variable_genes(combined_adata, n_top_genes=5000, layer="counts", flavor="seurat_v3", batch_key='subject', span=1)
     hvg_genes = pd.DataFrame(combined_adata.var[['highly_variable_rank', 'highly_variable_nbatches']])[combined_adata.var['highly_variable']]
     hvg_genes = hvg_genes[hvg_genes['highly_variable_nbatches'] > hvg_genes['highly_variable_nbatches'].median()]
     hvg_genes.sort_values(['highly_variable_rank'], inplace=True)

@@ -14,6 +14,7 @@ process SCDEDUSSY {
     script:
     """
     export NUMBA_CACHE_DIR=\$PWD
+    export SCIPY_ARRAY_API=1
     mkdir -p ${cluster_ordering}
     gene_list=${cluster_ordering}/limma.paired_${cluster_ordering}.filtered.txt 
     if [ "${params.limma}" != "true" ]; then
