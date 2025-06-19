@@ -17,7 +17,7 @@ process REPORT {
     """
     export HOME=\$PWD
     export SCIPY_ARRAY_API=1
-    /usersoftware/chanj3/tslearn/bin/python -m ipykernel install --user --name tslearn --display-name "[conda] tslearn"
+    /usersoftware/chanj3/tslearn/bin/python3 -m ipykernel install --user --name tslearn --display-name "[conda] tslearn"
     /usersoftware/chanj3/tslearn/bin/papermill ${baseDir}/bin/report.ipynb ${cluster_ordering}_report.ipynb \
     -p summary_df_path ${output_path}/${cluster_ordering}_summary_df.csv \
     -p aggregated_curves_path ${output_path}/${cluster_ordering}_aggregated_curves.csv \

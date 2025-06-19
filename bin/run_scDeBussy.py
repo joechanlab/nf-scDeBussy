@@ -1,8 +1,8 @@
 import os
 import argparse
 import pandas as pd
-from scDeBussy import aligner, gam_smooth_expression
-from scDeBussy.pp import stratified_downsample
+from scdebussy.tl import aligner, gam_smooth_expression
+from scdebussy.pp import stratified_downsample
 
 def main():
     parser = argparse.ArgumentParser(description="Run scDeBussy analysis")
@@ -49,6 +49,7 @@ def main():
                                                                n_splines=args.n_splines, 
                                                                lam=args.lam)
     print("Saving results...")
+    align_obj.df.to_csv(os.path.join(args.outpath, args.clusters + "_align_obj.csv"))
     summary_df.to_csv(os.path.join(args.outpath, args.clusters + '_summary_df.csv'))
     gene_curves.to_csv(os.path.join(args.outpath, args.clusters  + "_aggregated_curves.csv"))
     scores_df.to_csv(os.path.join(args.outpath, args.clusters  + "_scores_df.csv"))

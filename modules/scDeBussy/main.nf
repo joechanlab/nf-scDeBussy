@@ -20,7 +20,7 @@ process SCDEDUSSY {
     if [ "${params.limma}" != "true" ]; then
         gene_list=${cluster_ordering}/hvg_genes_${cluster_ordering}.txt 
     fi
-    /usersoftware/chanj3/tslearn/bin/python ${baseDir}/bin/run_scDeBussy.py \
+    /usersoftware/chanj3/tslearn/bin/python3 ${baseDir}/bin/run_scDeBussy.py \
         --path ${path} \
         --outpath ${cluster_ordering} \
         --clusters ${cluster_ordering} \

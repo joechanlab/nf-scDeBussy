@@ -3,7 +3,7 @@ import argparse
 import pandas as pd
 import scanpy as sc
 from pybiomart import Dataset
-from scDeBussy.pp import create_cellrank_probability_df
+from scdebussy.pp import create_cellrank_probability_df
 
 def main():
     parser = argparse.ArgumentParser(description="Preprocessing for scDeBussy analysis")
@@ -38,7 +38,8 @@ RU1646,NSCLC,SCLC-N_3
         key = parts[0]
         values = parts[1:]
         result_dict[key] = values
-    samples = ['RU1083', 'RU263', 'RU942', 'RU1444', 'RU1518', 'RU1293', 'RU1303', 'RU581', 'RU831', 'RU151']
+    samples = ['RU1083', 'RU1293', 'RU151', 'RU1181', 'RU1215', 'RU1303', 'RU1304', 'RU1444', 'RU1518', 'RU1646', 
+               'RU1676', 'RU263', 'RU581', 'RU831', 'RU942']
     clusters = args.clusters.split("_")
     h5ad_files = [os.path.join(args.path, x + ".no_cc.hvg_2000.090124.h5ad") for x in samples]
     combined_adata, df = create_cellrank_probability_df(adata_paths=h5ad_files, 

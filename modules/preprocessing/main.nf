@@ -15,7 +15,7 @@ process PREPROCESSING {
     export NUMBA_CACHE_DIR=\$PWD
     export SCIPY_ARRAY_API=1
     mkdir -p ${cluster_ordering}
-    /usersoftware/chanj3/tslearn/bin/python ${baseDir}/bin/preprocessing.py \
+    /usersoftware/chanj3/tslearn/bin/python3 ${baseDir}/bin/preprocessing.py \
         --path ${path} \
         --outpath ${cluster_ordering} \
         --clusters ${cluster_ordering} \
